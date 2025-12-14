@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import imgDefault from "./assets/ff.png";
 import imgTL from "./assets/lu.png";
 import imgTR from "./assets/ru.png";
@@ -15,6 +15,43 @@ export default function App() {
   const [active, setActive] = useState("default");
   const [modalName, setModalName] = useState(null);
 
+
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let isMounted = true;
+  
+    const imageSources = [
+      imgDefault,
+      imgTL,
+      imgTR,
+      imgBL,
+      imgBR,
+    ];
+  
+    let loadedCount = 0;
+  
+    imageSources.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+  
+      const onDone = () => {
+        loadedCount++;
+        if (loadedCount === imageSources.length && isMounted) {
+          setLoading(false);
+        }
+      };
+  
+      img.onload = onDone;
+      img.onerror = onDone;
+    });
+  
+    // ✅ cleanup
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+  
+
   const images = {
     default: imgDefault,
     tl: imgTL,
@@ -22,7 +59,32 @@ export default function App() {
     bl: imgBL,
     br: imgBR,
   };
-
+  if (loading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-stone-100">
+        <div className="flex flex-col items-center gap-5">
+          
+          {/* Spinner */}
+          <div
+            className="
+              w-24 h-24
+              border-4
+              border-stone-700
+              border-t-purple-700
+              rounded-full
+              animate-spin
+            "
+          ></div>
+  
+          {/* Text */}
+          <p className="text-stone-400 text-sm tracking-wide">
+            Loading assets…
+          </p>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="relative h-screen w-screen bg-[#fafaf8] overflow-hidden">
 
